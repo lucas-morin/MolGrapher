@@ -1,0 +1,57 @@
+name: Install & Smoke Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ "3.11" ]  # adjust if you want more versions
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+
+      - name: Install MolGrapher (Linux with [cpu] extra)
+        run: pip install "git+https://github.com/DS4SD/MolGrapher#egg=molgrapher[cpu]"
+
+      - name: Smoke test
+        run: python -c "import molgrapher; print('Linux import OK')"
+
+  macos:
+    runs-on: macos-14   # macos-14 for Apple Silicon; you can add a matrix if you want both
+    strategy:
+      matrix:
+        python-version: [ "3.11" ]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+
+      - name: Install PaddlePaddle (macOS special wheel)
+        run: pip install paddlepaddle==0.0.0 -f https://www.paddlepaddle.org.cn/whl/mac/cpu/develop.html
+
+      - name: Install Torch (CPU)
+        run: pip install torch==2.1.2 torchvision==0.16.2
+
+      - name: Install MolGrapher (macOS mode)
+        run: pip install "git+https://github.com/DS4SD/MolGrapher#egg=molgrapher"
+
+      - name: Smoke test
+        run: python -c "import molgrapher; print('macOS import OK')"
