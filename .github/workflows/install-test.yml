@@ -19,7 +19,7 @@ jobs:
       - name: Upgrade pip
         run: python -m pip install --upgrade pip
       - name: Install MolGrapher (Linux with [cpu] extra)
-        run: pip install "git+https://github.com/DS4SD/MolGrapher#egg=molgrapher[cpu]"
+        run: pip install "git+https://github.com/lucas-morin/MolGrapher#egg=molgrapher[cpu]"
       - name: Run prediction test
         run: |
           python - <<'PY'
@@ -45,7 +45,7 @@ jobs:
   #     - name: Install MolGrapher (Linux with [gpu] extra)
   #       env:
   #         PIP_EXTRA_INDEX_URL: https://download.pytorch.org/whl/cu117
-  #       run: pip install "git+https://github.com/DS4SD/MolGrapher#egg=molgrapher[gpu]"
+  #       run: pip install "git+https://github.com/lucas-morin/MolGrapher#egg=molgrapher[gpu]"
   #     - name: Verify GPU availability
   #       run: |
   #         python - <<'PY'
@@ -86,7 +86,7 @@ jobs:
         run: pip install torch==2.1.2 torchvision==0.16.2
 
       - name: Install MolGrapher (macOS mode)
-        run: pip install "git+https://github.com/DS4SD/MolGrapher#egg=molgrapher"
+        run: pip install "git+https://github.com/lucas-morin/MolGrapher#egg=molgrapher"
 
       - name: Smoke test
         run: |
