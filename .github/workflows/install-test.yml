@@ -26,7 +26,15 @@ jobs:
         run: pip install "git+https://github.com/DS4SD/MolGrapher#egg=molgrapher[cpu]"
 
       - name: Smoke test
-        run: python -c "import molgrapher; print('Linux import OK')"
+        run: |
+          python - <<'PY'
+          from molgrapher.models.molgrapher_model import MolgrapherModel
+
+          model = MolgrapherModel()
+          images_or_paths = ["./data/benchmarks/default/images/image_0.png"]
+          annotations = model.predict_batch(images_or_paths)
+          print("Predictions:", annotations)
+          PY
 
   macos:
     runs-on: macos-14   # macos-14 for Apple Silicon; you can add a matrix if you want both
@@ -54,4 +62,12 @@ jobs:
         run: pip install "git+https://github.com/DS4SD/MolGrapher#egg=molgrapher"
 
       - name: Smoke test
-        run: python -c "import molgrapher; print('macOS import OK')"
+        run: |
+          python - <<'PY'
+          from molgrapher.models.molgrapher_model import MolgrapherModel
+
+          model = MolgrapherModel()
+          images_or_paths = ["./data/benchmarks/default/images/image_0.png"]
+          annotations = model.predict_batch(images_or_paths)
+          print("Predictions:", annotations)
+          PY
