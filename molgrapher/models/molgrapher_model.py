@@ -41,9 +41,9 @@ class MolgrapherModel:
     def set_default_args(self):
         self.args = {
             "force_cpu": False,  # Force all processing to run on CPU.
-            "force_no_multiprocessing": True,  # Disable multiprocessing for PaddleOCR.
+            "force_no_multiprocessing": True,  # Disable multiprocessing for abbreviation recognition (using PaddleOCR).
             "num_threads_pytorch": 10,  # Number of threads used by PyTorch.
-            "num_processes_mp": 10,  # Number of processes for multiprocessing.
+            "num_processes_mp": 10,  # Number of processes for multiprocessing (abbreviation recognition, precompute_keypoints_synthetic).
             "chunk_size": 200,  # Number of images processed per batch.
             "assign_stereo": True,  # Embed stereochemistry in MOL file output (only valid if a stereo model is used).
             "align_rdkit_output": False,  # Embed 2D atom coordinates in output MOL files.
@@ -117,6 +117,9 @@ class MolgrapherModel:
         self.config_dataset_keypoint["num_threads_pytorch"] = self.args[
             "num_threads_pytorch"
         ]
+
+        # Test
+        self.config_dataset_graph["nb_workers"] = 0
 
         # Update number of atoms/bonds classes if a node classifier variant is selected.
         if self.args["node_classifier_variant"] != "":
