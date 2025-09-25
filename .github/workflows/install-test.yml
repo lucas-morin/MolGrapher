@@ -111,9 +111,6 @@ jobs:
               model = MolgrapherModel(
                   args={
                     "force_no_multiprocessing": True,
-                    "nb_workers": 4,
-                    "prefetch_factor": None,
-                    "persistent_workers": False,
                   }
               )
               images_or_paths = ["./data/benchmarks/default/images/image_0.png"]
