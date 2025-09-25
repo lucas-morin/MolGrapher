@@ -30,6 +30,9 @@ def main():
     )
     parser.add_argument("--num-threads-pytorch", type=int, default=10)
     parser.add_argument("--num-processes-mp", type=int, default=10)
+    parser.add_argument("--nb-workers", type=int, default=4)
+    parser.add_argument("--prefetch-factor", type=int, default=2)
+    parser.add_argument("--persistent-workers", type=bool, default=True)
     parser.add_argument("--chunk-size", type=int, default=200)
     parser.add_argument(
         "--assign-stereo",
