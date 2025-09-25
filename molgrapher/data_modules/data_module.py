@@ -1196,6 +1196,7 @@ class DataModule(pl.LightningDataModule):
         return dataloaders_list
 
     def get_dataloader(self, dataset):
+        print(self.config)
         if hasattr(dataset, "collate_fn") and (dataset.collate_fn != None):
             return DataLoader(
                 dataset,

@@ -115,6 +115,7 @@ jobs:
                 "persistent_workers": False,
               }
           )
+          
           images_or_paths = ["./data/benchmarks/default/images/image_0.png"]
           annotations = model.predict_batch(images_or_paths)
           print("Predictions:", annotations)
