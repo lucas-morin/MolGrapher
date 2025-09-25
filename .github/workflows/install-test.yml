@@ -107,7 +107,7 @@ jobs:
           python - <<'PY'
           from molgrapher.models.molgrapher_model import MolgrapherModel
 
-          model = MolgrapherModel(conf={"force_no_multiprocessing": True})
+          model = MolgrapherModel(args={"force_no_multiprocessing": True})
           images_or_paths = ["./data/benchmarks/default/images/image_0.png"]
           annotations = model.predict_batch(images_or_paths)
           print("Predictions:", annotations)
