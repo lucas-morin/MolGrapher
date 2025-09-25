@@ -224,21 +224,7 @@ class MolgrapherModel:
             annotations_batch.extend(self.predict(_batch_images_paths))
         return annotations_batch
 
-    def predict(self, images_or_paths):
-
-        # Adjust multiprocessing for MAC
-        import sys, multiprocessing as mp
-        # Only adjust on macOS; leave Linux/Windows defaults untouched
-        if sys.platform == "darwin":
-            # If nothing set yet (or default spawn), prefer fork to avoid <stdin> re-import issues
-            method = mp.get_start_method(allow_none=True)
-            if method in (None, "spawn"):
-                try:
-                    mp.set_start_method("fork")
-                except RuntimeError:
-                    # Someone already set a method; leave it alone
-                    pass
-                
+    def predict(self, images_or_paths):                
         if not isinstance(images_or_paths, list):
             images_or_paths = [images_or_paths]
 

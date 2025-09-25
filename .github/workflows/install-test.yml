@@ -102,21 +102,27 @@ jobs:
       - name: Install MolGrapher 
         run: pip install "git+https://github.com/lucas-morin/MolGrapher#egg=molgrapher"
 
-      - name: Run prediction test
+      - name: Create prediction test script
         run: |
-          python - <<'PY'
+          cat > run_predict.py <<'PY'
           from molgrapher.models.molgrapher_model import MolgrapherModel
 
-          model = MolgrapherModel(
-              args={
-                "force_no_multiprocessing": True,
-                "nb_workers": 4,
-                "prefetch_factor": None,
-                "persistent_workers": False,
-              }
-          )
-          
-          images_or_paths = ["./data/benchmarks/default/images/image_0.png"]
-          annotations = model.predict_batch(images_or_paths)
-          print("Predictions:", annotations)
+          def main():
+              model = MolgrapherModel(
+                  args={
+                    "force_no_multiprocessing": True,
+                    "nb_workers": 4,
+                    "prefetch_factor": None,
+                    "persistent_workers": False,
+                  }
+              )
+              images_or_paths = ["./data/benchmarks/default/images/image_0.png"]
+              annotations = model.predict_batch(images_or_paths)
+              print("Predictions:", annotations)
+
+          if __name__ == "__main__":
+              main()
           PY
+
+      - name: Run prediction test
+        run: python run_predict.py
