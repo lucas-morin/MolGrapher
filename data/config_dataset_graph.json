@@ -3,6 +3,7 @@
     "batch_size": 10,
     "nb_workers": 10,
     "prefetch_factor": 2,
+    "persistent_workers": true,
     "num_processes_mp": 8,
     "num_threads_pytorch": 10,
     "image_size": [3, 1024, 1024],

@@ -1205,7 +1205,7 @@ class DataModule(pl.LightningDataModule):
                 shuffle=False,
                 prefetch_factor=self.config["prefetch_factor"],
                 pin_memory=True,
-                persistent_workers=True,
+                persistent_workers=self.config["persistent_workers"],
                 drop_last=False,
                 collate_fn=dataset.collate_fn,
             )
@@ -1217,6 +1217,6 @@ class DataModule(pl.LightningDataModule):
                 shuffle=False,
                 prefetch_factor=self.config["prefetch_factor"],
                 pin_memory=True,
-                persistent_workers=True,
+                persistent_workers=self.config["persistent_workers"],
                 drop_last=False,
             )

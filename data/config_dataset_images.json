@@ -3,5 +3,6 @@
     "nb_sample": 30,
     "batch_size": 4,
     "nb_workers": 4,
-    "prefetch_factor": 2
+    "prefetch_factor": 2,
+    "persistent_workers": true
 }
