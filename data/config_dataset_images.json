@@ -2,5 +2,6 @@
     "image_size": [3, 1024, 1024],
     "nb_sample": 30,
     "batch_size": 4,
-    "nb_workers": 4
+    "nb_workers": 4,
+    "prefetch_factor": 2
 }

@@ -120,6 +120,7 @@ class MolgrapherModel:
 
         # Test
         self.config_dataset_graph["nb_workers"] = 0
+        self.config_dataset_graph["prefetch_factor"] = None
 
         # Update number of atoms/bonds classes if a node classifier variant is selected.
         if self.args["node_classifier_variant"] != "":
