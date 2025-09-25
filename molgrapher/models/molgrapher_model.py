@@ -124,12 +124,12 @@ class MolgrapherModel:
         self.config_dataset_keypoint["num_threads_pytorch"] = self.args[
             "num_threads_pytorch"
         ]
-        self.config_dataset_graph["nb_workers"] = self.args["num_processes_mp"]
+        self.config_dataset_graph["nb_workers"] = self.args["nb_workers"]
         self.config_dataset_graph["prefetch_factor"] = self.args["prefetch_factor"]
         self.config_dataset_graph["persistent_workers"] = self.args[
             "persistent_workers"
         ]
-        self.config_dataset_keypoint["nb_workers"] = self.args["num_processes_mp"]
+        self.config_dataset_keypoint["nb_workers"] = self.args["nb_workers"]
         self.config_dataset_keypoint["prefetch_factor"] = self.args["prefetch_factor"]
         self.config_dataset_keypoint["persistent_workers"] = self.args[
             "persistent_workers"
@@ -225,6 +225,20 @@ class MolgrapherModel:
         return annotations_batch
 
     def predict(self, images_or_paths):
+
+        # Adjust multiprocessing for MAC
+        # import sys, multiprocessing as mp
+        # # Only adjust on macOS; leave Linux/Windows defaults untouched
+        # if sys.platform == "darwin":
+        #     # If nothing set yet (or default spawn), prefer fork to avoid <stdin> re-import issues
+        #     method = mp.get_start_method(allow_none=True)
+        #     if method in (None, "spawn"):
+        #         try:
+        #             mp.set_start_method("fork")
+        #         except RuntimeError:
+        #             # Someone already set a method; leave it alone
+        #             pass
+                
         if not isinstance(images_or_paths, list):
             images_or_paths = [images_or_paths]
 
