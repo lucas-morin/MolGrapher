@@ -26,14 +26,20 @@ from molgrapher.data_modules.data_module import DataModule
 from molgrapher.datasets.dataset_graph import GraphDataset
 from molgrapher.datasets.dataset_image import ImageDataset
 from molgrapher.datasets.dataset_molfile import MolfileDataset
-from molgrapher.models.abbreviation_detector import (AbbreviationDetectorCPU,
-                                                     AbbreviationDetectorGPU,
-                                                     SpellingCorrector)
-from molgrapher.models.graph_recognizer import (GraphRecognizer,
-                                                StereochemistryRecognizer)
+from molgrapher.models.abbreviation_detector import (
+    AbbreviationDetectorCPU,
+    AbbreviationDetectorGPU,
+    SpellingCorrector,
+)
+from molgrapher.models.graph_recognizer import (
+    GraphRecognizer,
+    StereochemistryRecognizer,
+)
 from molgrapher.utils.utils_dataset import get_bonds_sizes
 from molgrapher.utils.utils_evaluation import (
-    compute_molecule_prediction_quality, get_molecule_information)
+    compute_molecule_prediction_quality,
+    get_molecule_information,
+)
 
 os.environ["OMP_NUM_THREADS"] = "1"
 cv2.setNumThreads(0)

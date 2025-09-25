@@ -16,8 +16,7 @@ from rdkit import Chem
 from torchvision.transforms import functional
 
 from molgrapher.models.graph_constructor import GraphConstructor
-from molgrapher.utils.utils_augmentation import (GraphTransformer,
-                                                 get_transforms_dict)
+from molgrapher.utils.utils_augmentation import GraphTransformer, get_transforms_dict
 from molgrapher.utils.utils_graph import MolecularGraph
 
 

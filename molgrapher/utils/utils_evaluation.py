@@ -9,15 +9,16 @@ from collections import defaultdict
 import torch
 import torchvision.ops.boxes as bops
 from mol_depict.molfile_parser.label_molfile import LabelMolFile
-from mol_depict.utils.utils_molecule import (get_molecule_from_molfile,
-                                             get_molecule_from_smiles)
+from mol_depict.utils.utils_molecule import (
+    get_molecule_from_molfile,
+    get_molecule_from_smiles,
+)
 from nltk.translate.bleu_score import SmoothingFunction, sentence_bleu
 from rdkit import Chem, DataStructs
 from rdkit.Chem.Draw import rdMolDraw2D
 from rdkit.Chem.inchi import MolToInchi
 from rouge_score import rouge_scorer
-from sklearn.metrics import (accuracy_score, classification_report,
-                             confusion_matrix)
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.preprocessing import MultiLabelBinarizer
 from SmilesPE.pretokenizer import atomwise_tokenizer
 

@@ -33,7 +33,9 @@ from molgrapher.models.imago import Imago
 from molgrapher.models.molvec import MolVec
 from molgrapher.models.osra import OSRA
 from molgrapher.utils.utils_evaluation import (
-    compute_molecule_prediction_quality, get_molecule_information)
+    compute_molecule_prediction_quality,
+    get_molecule_information,
+)
 
 
 def main():

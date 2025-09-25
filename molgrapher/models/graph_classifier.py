@@ -15,7 +15,10 @@ from torch_geometric.nn import GCNConv
 
 from molgrapher.utils.utils_graph import MolecularGraph
 from molgrapher.utils.utils_graph_classifier import (
-    get_point_of_trisection_coordinates, get_positional_encoding_2d, resnet50)
+    get_point_of_trisection_coordinates,
+    get_positional_encoding_2d,
+    resnet50,
+)
 
 
 class Backbone(nn.Module):

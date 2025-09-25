@@ -28,8 +28,7 @@ from tqdm import tqdm
 
 logger = logging.getLogger("ocsr_logger")
 
-from mol_depict.molfile_parser.image_registration import \
-    get_affine_transformation
+from mol_depict.molfile_parser.image_registration import get_affine_transformation
 from mol_depict.molfile_parser.label_molfile import LabelMolFile
 from mol_depict.utils.utils_drawing import draw_molecule_keypoints_rdkit
 from mol_depict.utils.utils_image import resize_image, transform_png_image

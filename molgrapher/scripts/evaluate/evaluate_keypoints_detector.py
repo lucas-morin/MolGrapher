@@ -16,6 +16,7 @@ from molgrapher.data_modules.data_module import DataModule
 from molgrapher.datasets.dataset_keypoint import KeypointDataset
 from molgrapher.datasets.dataset_molfile import MolfileDataset
 from molgrapher.models.keypoint_detector import KeypointDetector
+
 # Modules
 from molgrapher.utils.utils_dataset import get_bond_size
 from molgrapher.utils.utils_evaluation import get_metrics_keypoint_detector

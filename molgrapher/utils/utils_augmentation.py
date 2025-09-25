@@ -8,18 +8,26 @@ import os
 import random
 
 import albumentations as albu
+
 # Images
 import cv2
+
 # Mathematics
 import numpy as np
 from albumentations.augmentations.blur.transforms import GaussianBlur
 from albumentations.augmentations.geometric.resize import Resize
-from albumentations.augmentations.geometric.transforms import (Affine,
-                                                               Perspective,
-                                                               PiecewiseAffine)
+from albumentations.augmentations.geometric.transforms import (
+    Affine,
+    Perspective,
+    PiecewiseAffine,
+)
+
 # Modules
-from mol_depict.utils.image_transformation import (PepperPatches,
-                                                   RandomCaption, RandomLines)
+from mol_depict.utils.image_transformation import (
+    PepperPatches,
+    RandomCaption,
+    RandomLines,
+)
 
 
 def get_transforms_dict(config):

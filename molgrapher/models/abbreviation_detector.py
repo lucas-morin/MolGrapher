@@ -2,17 +2,21 @@
 # -*- coding: utf-8 -*-
 
 import json
+
 # Python
 import multiprocessing
 import os
 
 # Image
 import cv2
+
 # Mathematics
 import numpy as np
+
 # Pytorch
 import torch
 from mol_depict.utils.utils_image import resize_image
+
 # OCR
 from paddleocr import PaddleOCR
 from PIL import Image

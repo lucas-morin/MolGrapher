@@ -24,11 +24,15 @@ from tqdm import tqdm
 
 from molgrapher.data_modules.data_module import DataModule
 from molgrapher.datasets.dataset_image import ImageDataset
-from molgrapher.models.abbreviation_detector import (AbbreviationDetectorCPU,
-                                                     AbbreviationDetectorGPU,
-                                                     SpellingCorrector)
-from molgrapher.models.graph_recognizer import (GraphRecognizer,
-                                                StereochemistryRecognizer)
+from molgrapher.models.abbreviation_detector import (
+    AbbreviationDetectorCPU,
+    AbbreviationDetectorGPU,
+    SpellingCorrector,
+)
+from molgrapher.models.graph_recognizer import (
+    GraphRecognizer,
+    StereochemistryRecognizer,
+)
 from molgrapher.utils.utils_dataset import get_bonds_sizes
 from molgrapher.utils.utils_logging import count_model_parameters
 
@@ -44,9 +48,9 @@ class MolgrapherModel:
             "force_no_multiprocessing": True,  # Disable multiprocessing for abbreviation recognition (using PaddleOCR).
             "num_threads_pytorch": 10,  # Number of threads used by PyTorch.
             "num_processes_mp": 10,  # Number of processes for multiprocessing (abbreviation recognition, precompute_keypoints_synthetic).
-            "nb_workers": 4, # Number of workers for the DataLoader.
-            "prefetch_factor": 2, # Prefetch factor for the DataLoader.
-            "persistent_workers": True, # Use persistent workers in DataLoader.
+            "nb_workers": 4,  # Number of workers for the DataLoader.
+            "prefetch_factor": 2,  # Prefetch factor for the DataLoader.
+            "persistent_workers": True,  # Use persistent workers in DataLoader.
             "chunk_size": 200,  # Number of images processed per batch.
             "assign_stereo": True,  # Embed stereochemistry in MOL file output (only valid if a stereo model is used).
             "align_rdkit_output": False,  # Embed 2D atom coordinates in output MOL files.
@@ -57,10 +61,10 @@ class MolgrapherModel:
             "clean": True,  # Clean specified output folders before running.
             "visualize": True,  # Visualize predicted graphs and MOL prediction.
             "visualize_rdkit": False,  # Visualize MOL prediction alone.
-            "node_classifier_variant": "gc_no_stereo_model",  # Select between "gc_no_stereo_model", "gc_gcn_model" and "gc_stereo_model". 
-                                                              # "gc_no_stereo_model" has the best accuracy in most cases. 
-                                                              # "gc_gcn_model" has better accuracy in some cases but do not recognizes abbreviations.
-                                                              # "gc_stereo_model" can recognize stereo-chemistry.                                                               
+            "node_classifier_variant": "gc_no_stereo_model",  # Select between "gc_no_stereo_model", "gc_gcn_model" and "gc_stereo_model".
+            # "gc_no_stereo_model" has the best accuracy in most cases.
+            # "gc_gcn_model" has better accuracy in some cases but do not recognizes abbreviations.
+            # "gc_stereo_model" can recognize stereo-chemistry.
             "visualize_output_folder_path": os.path.dirname(__file__)
             + "/../../data/visualization/predictions/default/",
             "visualize_rdkit_output_folder_path": os.path.dirname(__file__)
@@ -119,6 +123,16 @@ class MolgrapherModel:
         self.config_dataset_keypoint["num_processes_mp"] = self.args["num_processes_mp"]
         self.config_dataset_keypoint["num_threads_pytorch"] = self.args[
             "num_threads_pytorch"
+        ]
+        self.config_dataset_graph["nb_workers"] = self.args["num_processes_mp"]
+        self.config_dataset_graph["prefetch_factor"] = self.args["prefetch_factor"]
+        self.config_dataset_graph["persistent_workers"] = self.args[
+            "persistent_workers"
+        ]
+        self.config_dataset_keypoint["nb_workers"] = self.args["num_processes_mp"]
+        self.config_dataset_keypoint["prefetch_factor"] = self.args["prefetch_factor"]
+        self.config_dataset_keypoint["persistent_workers"] = self.args[
+            "persistent_workers"
         ]
 
         # Update number of atoms/bonds classes if a node classifier variant is selected.

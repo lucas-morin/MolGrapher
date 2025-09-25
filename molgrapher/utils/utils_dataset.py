@@ -3,15 +3,18 @@
 
 import math
 import multiprocessing
+
 # Python
 import os
 
 # Images
 import cv2
+
 # Mathematics
 import numpy as np
 import PIL.ImageOps
 import torch
+
 # Modules
 from mol_depict.utils.utils_image import resize_image
 from PIL import Image

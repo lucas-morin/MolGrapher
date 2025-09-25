@@ -7,8 +7,7 @@ import torch
 from PIL import Image
 from torchvision.transforms import functional
 
-from molgrapher.utils.utils_augmentation import (GraphTransformer,
-                                                 get_transforms_dict)
+from molgrapher.utils.utils_augmentation import GraphTransformer, get_transforms_dict
 from molgrapher.utils.utils_dataset import get_bond_size
 
 

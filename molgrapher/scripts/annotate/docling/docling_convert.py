@@ -6,8 +6,7 @@ import json
 import os
 from pathlib import Path
 
-from docling.backend.docling_parse_v2_backend import \
-    DoclingParseV2DocumentBackend
+from docling.backend.docling_parse_v2_backend import DoclingParseV2DocumentBackend
 from docling.datamodel.base_models import InputFormat
 from docling.datamodel.pipeline_options import PdfPipelineOptions
 from docling.document_converter import DocumentConverter, PdfFormatOption
@@ -19,7 +18,8 @@ def main():
     parser.add_argument(
         "--pdf-path",
         type=str,
-        default=os.path.dirname(__file__) + f"/../../../../data/pdfs/US9259003_page_4.pdf",
+        default=os.path.dirname(__file__)
+        + f"/../../../../data/pdfs/US9259003_page_4.pdf",
     )
     parser.add_argument(
         "--docling-document-directory-path",

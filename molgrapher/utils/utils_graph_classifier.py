@@ -5,8 +5,11 @@ import numpy as np
 import torch
 import torch.utils.model_zoo as model_zoo
 from torch import nn
-from torchvision.models.resnet import (ResNet18_Weights, ResNet50_Weights,
-                                       ResNet101_Weights)
+from torchvision.models.resnet import (
+    ResNet18_Weights,
+    ResNet50_Weights,
+    ResNet101_Weights,
+)
 
 
 def get_point_of_trisection_coordinates(segment, ratio_b, ratio_e):
