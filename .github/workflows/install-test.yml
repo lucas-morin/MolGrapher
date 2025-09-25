@@ -18,7 +18,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Upgrade pip
         run: python -m pip install --upgrade pip
-      - name: Install MolGrapher (Linux with [cpu] extra)
+      - name: Install MolGrapher 
         run: pip install "git+https://github.com/lucas-morin/MolGrapher#egg=molgrapher[cpu]"
       - name: Run prediction test
         run: |
@@ -42,7 +42,7 @@ jobs:
   #         python-version: "3.11"
   #     - name: Upgrade pip
   #       run: python -m pip install --upgrade pip
-  #     - name: Install MolGrapher (Linux with [gpu] extra)
+  #     - name: Install MolGrapher 
   #       env:
   #         PIP_EXTRA_INDEX_URL: https://download.pytorch.org/whl/cu117
   #       run: pip install "git+https://github.com/lucas-morin/MolGrapher#egg=molgrapher[gpu]"
@@ -82,13 +82,24 @@ jobs:
       - name: Install system Cairo (needed for cairosvg)
         run: brew install cairo pango gdk-pixbuf libffi
 
+      - name: Export Homebrew paths so Python can find Cairo
+        run: |
+          echo "HOMEBREW_PREFIX=$(brew --prefix)" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=$(brew --prefix)/lib/pkgconfig" >> $GITHUB_ENV
+          echo "CFLAGS=-I$(brew --prefix)/include" >> $GITHUB_ENV
+          echo "LDFLAGS=-L$(brew --prefix)/lib" >> $GITHUB_ENV
+          # Help the dynamic loader find libcairo at runtime
+          echo "DYLD_FALLBACK_LIBRARY_PATH=$(brew --prefix)/lib" >> $GITHUB_ENV
+          # Optional: some environments also honor this
+          echo "DYLD_LIBRARY_PATH=$(brew --prefix)/lib" >> $GITHUB_ENV
+
       - name: Install PaddlePaddle (macOS special wheel)
         run: pip install paddlepaddle==0.0.0 -f https://www.paddlepaddle.org.cn/whl/mac/cpu/develop.html
 
       - name: Install Torch (CPU)
         run: pip install torch==2.1.2 torchvision==0.16.2
 
-      - name: Install MolGrapher (macOS mode)
+      - name: Install MolGrapher 
         run: pip install "git+https://github.com/lucas-morin/MolGrapher#egg=molgrapher"
 
       - name: Run prediction test
