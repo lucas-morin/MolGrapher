@@ -37,67 +37,22 @@ jobs:
   #     - name: Run prediction test
   #       run: python run_predict.py
 
-  # linux-gpu:
-  #   runs-on: ubuntu-latest
-  #   defaults:
-  #     run:
-  #       shell: bash -l {0}
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-python@v5
-  #       with:
-  #         python-version: "3.11"
-  #     - name: Upgrade pip
-  #       run: python -m pip install --upgrade pip
-  #     - name: Install MolGrapher 
-  #       env:
-  #         PIP_EXTRA_INDEX_URL: https://download.pytorch.org/whl/cu117
-  #       run: pip install "git+https://github.com/lucas-morin/MolGrapher#egg=molgrapher[gpu]"
-  #     - name: Verify GPU availability
-  #       run: |
-  #         python - <<'PY'
-  #         import torch
-  #         print("Torch CUDA available?", torch.cuda.is_available())
-  #         print("Torch CUDA device count:", torch.cuda.device_count())
-  #         PY
-  #     - name: Create prediction test script
-  #       run: |
-  #         cat > run_predict.py <<'PY'
-  #         from molgrapher.models.molgrapher_model import MolgrapherModel
-
-  #         def main():
-  #             model = MolgrapherModel()
-  #             images_or_paths = ["./data/benchmarks/default/images/image_0.png"]
-  #             annotations = model.predict_batch(images_or_paths)
-  #             print("Predictions:", annotations)
-
-  #         if __name__ == "__main__":
-  #             main()
-  #         PY
-  #     - name: Run prediction test
-  #       run: python run_predict.py
-
   linux-gpu:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.11"]
-
+    defaults:
+      run:
+        shell: bash -l {0}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
-      
-      - name: Install dependencies
+          python-version: "3.11"
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+      - name: Install MolGrapher 
         env:
           PIP_EXTRA_INDEX_URL: https://download.pytorch.org/whl/cu117
-        run: |
-          python -m pip install --upgrade pip
-          pip install "git+https://github.com/lucas-morin/MolGrapher#egg=molgrapher[gpu]"
-
+        run: pip install "git+https://github.com/lucas-morin/MolGrapher#egg=molgrapher[gpu]"
       - name: Verify GPU availability
         run: |
           python - <<'PY'
@@ -105,7 +60,6 @@ jobs:
           print("Torch CUDA available?", torch.cuda.is_available())
           print("Torch CUDA device count:", torch.cuda.device_count())
           PY
-
       - name: Create prediction test script
         run: |
           cat > run_predict.py <<'PY'
@@ -120,9 +74,55 @@ jobs:
           if __name__ == "__main__":
               main()
           PY
-
       - name: Run prediction test
         run: python run_predict.py
+
+  # linux-gpu:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       python-version: ["3.11"]
+
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
+      
+  #     - name: Install dependencies
+  #       env:
+  #         PIP_EXTRA_INDEX_URL: https://download.pytorch.org/whl/cu117
+  #       run: |
+  #         python -m pip install --upgrade pip
+  #         pip install "git+https://github.com/lucas-morin/MolGrapher#egg=molgrapher[gpu]"
+
+  #     - name: Verify GPU availability
+  #       run: |
+  #         python - <<'PY'
+  #         import torch
+  #         print("Torch CUDA available?", torch.cuda.is_available())
+  #         print("Torch CUDA device count:", torch.cuda.device_count())
+  #         PY
+
+  #     - name: Create prediction test script
+  #       run: |
+  #         cat > run_predict.py <<'PY'
+  #         from molgrapher.models.molgrapher_model import MolgrapherModel
+
+  #         def main():
+  #             model = MolgrapherModel()
+  #             images_or_paths = ["./data/benchmarks/default/images/image_0.png"]
+  #             annotations = model.predict_batch(images_or_paths)
+  #             print("Predictions:", annotations)
+
+  #         if __name__ == "__main__":
+  #             main()
+  #         PY
+
+  #     - name: Run prediction test
+  #       run: python run_predict.py
 
   # linux-cpu:
   #   runs-on: ubuntu-latest
