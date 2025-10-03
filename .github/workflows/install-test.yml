@@ -120,21 +120,23 @@ jobs:
   #       run: python run_predict.py
 
   macos:
-    runs-on: macos-15
     strategy:
       matrix:
-        python-version: [ "3.11" ]
-    env:
-      # Ensure dynamic linker can locate Homebrew libraries on macOS
-      DYLD_FALLBACK_LIBRARY_PATH: /opt/homebrew/lib
-
+        os: [macos-15, macos-14, macos-15-intel]
+        python-version: ["3.11"]
+    runs-on: ${{ matrix.os }}
+    
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          
+      
+      - name: Export Homebrew library path for dynamic loading
+        run: echo "DYLD_FALLBACK_LIBRARY_PATH=$(brew --prefix)/lib" >> $GITHUB_ENV
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
