@@ -9,22 +9,21 @@ jobs:
   windows:
     runs-on: windows-latest
     strategy:
-      matrix:
-        python-version: ["3.11"]
+      matrix: { python-version: ["3.11"] }
 
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: ${{ matrix.python-version }} }
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
+      - name: Install GTK (Cairo runtime)
+        run: choco install gtk-runtime -y
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install torch==2.1.2 torchvision==0.16.2 
-          pip install paddlepaddle
+          pip install torch==2.1.2 torchvision==0.16.2
+          pip install paddlepaddle paddleocr==2.10.0
           pip install "molgrapher @ git+https://github.com/lucas-morin/MolGrapher"
 
       - name: Create prediction test script
@@ -32,13 +31,10 @@ jobs:
         run: |
           cat > run_predict.py <<'PY'
           from molgrapher.models.molgrapher_model import MolgrapherModel
-
           def main():
               model = MolgrapherModel()
-              images_or_paths = ["./data/benchmarks/default/images/image_0.png"]
-              annotations = model.predict_batch(images_or_paths)
-              print("Predictions:", annotations)
-
+              anns = model.predict_batch(["./data/benchmarks/default/images/image_0.png"])
+              print("Predictions:", anns)
           if __name__ == "__main__":
               main()
           PY
