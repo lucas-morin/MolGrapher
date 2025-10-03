@@ -19,14 +19,15 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install GTK (Cairo) and add to PATH
+      - name: Install Cairo/Pango (MSYS2) and add to PATH
         shell: pwsh
         run: |
-          choco install gtk-runtime -y
-          $paths = @("C:\tools\gtk\bin",
-                    "C:\Program Files\GTK3-Runtime Win64\bin",
-                    "C:\Program Files\GTK3-Runtime\bin")
-          foreach ($p in $paths) { if (Test-Path $p) { "$p" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append } }
+          choco install msys2 -y
+          $roots = @("C:\tools\msys64","C:\msys64") | Where-Object { Test-Path $_ }
+          $msys = $roots[0]
+          & "$msys\usr\bin\bash.exe" -lc "pacman -Sy --noconfirm"
+          & "$msys\usr\bin\bash.exe" -lc "pacman -S --noconfirm mingw-w64-x86_64-cairo mingw-w64-x86_64-pango"
+          "$msys\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Install dependencies
         run: |
