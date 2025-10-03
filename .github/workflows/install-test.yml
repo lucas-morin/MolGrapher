@@ -92,16 +92,6 @@ jobs:
         run: python -m pip install --upgrade pip
       - name: Install system Cairo (needed for cairosvg)
         run: brew install pango gdk-pixbuf libffi
-      - name: Export Homebrew paths so Python can find Cairo
-        run: |
-          echo "HOMEBREW_PREFIX=$(brew --prefix)" >> $GITHUB_ENV
-          echo "PKG_CONFIG_PATH=$(brew --prefix)/lib/pkgconfig" >> $GITHUB_ENV
-          echo "CFLAGS=-I$(brew --prefix)/include" >> $GITHUB_ENV
-          echo "LDFLAGS=-L$(brew --prefix)/lib" >> $GITHUB_ENV
-          # Help the dynamic loader find libcairo at runtime
-          echo "DYLD_FALLBACK_LIBRARY_PATH=$(brew --prefix)/lib" >> $GITHUB_ENV
-          # Optional: some environments also honor this
-          echo "DYLD_LIBRARY_PATH=$(brew --prefix)/lib" >> $GITHUB_ENV
       - name: Install PaddlePaddle (macOS special wheel)
         run: pip install paddlepaddle==0.0.0 -f https://www.paddlepaddle.org.cn/whl/mac/cpu/develop.html
       - name: Install Torch (CPU)
@@ -114,7 +104,7 @@ jobs:
           from molgrapher.models.molgrapher_model import MolgrapherModel
 
           def main():
-              model = MolgrapherModel(args={"force_no_multiprocessing": True})
+              model = MolgrapherModel()
               images_or_paths = ["./data/benchmarks/default/images/image_0.png"]
               annotations = model.predict_batch(images_or_paths)
               print("Predictions:", annotations)
