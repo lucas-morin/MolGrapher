@@ -61,50 +61,67 @@ jobs:
           cat > run_predict.py <<'PY'
           import os, sys
 
-          # Paddle CPU workaround in CI
+          # Paddle CPU workaround in CI (avoid OneDNN crash)
           os.environ["FLAGS_use_mkldnn"] = "0"
           os.environ["OMP_NUM_THREADS"]  = "1"
           os.environ["MKL_NUM_THREADS"]  = "1"
 
-          def strip_usr_bin_from_path():
-              path = os.environ.get("PATH", "")
-              parts = path.split(";")
-              filtered = [p for p in parts if not p.lower().endswith("\\usr\\bin")]
-              os.environ["PATH"] = ";".join(filtered)
-
-          def add_dll_dirs_for_mingw64():
-              # Keep cairo DLLs discoverable after removing usr\bin
+          def find_msys_paths():
+              usr_bin = None
+              mingw_bin = None
               for p in os.environ.get("PATH","").split(";"):
-                  if p.lower().endswith("\\mingw64\\bin"):
-                      try:
-                          os.add_dll_directory(p)
-                      except Exception:
-                          pass
+                  pl = p.lower().rstrip("\\/")
+                  if pl.endswith("\\msys64\\usr\\bin"):
+                      usr_bin = p
+                  if pl.endswith("\\msys64\\mingw64\\bin"):
+                      mingw_bin = p
+              return usr_bin, mingw_bin
 
+          def remove_from_path(target):
+              if not target:
+                  return
+              parts = [p for p in os.environ.get("PATH","").split(";") if p and os.path.normcase(p) != os.path.normcase(target)]
+              os.environ["PATH"] = ";".join(parts)
+
+          def prepend_to_path(target):
+              if target and target not in os.environ.get("PATH",""):
+                  os.environ["PATH"] = f"{target};" + os.environ.get("PATH","")
+
+          usr_bin, mingw_bin = find_msys_paths()
+
+          # Ensure cairo DLLs remain discoverable no matter how PATH changes
+          if mingw_bin:
+              try:
+                  os.add_dll_directory(mingw_bin)
+              except Exception:
+                  pass
+
+          # CRITICAL: make torch see NumPy.
+          # Remove msys2\usr\bin, import numpy FIRST (before torch), then re-add usr\bin.
+          remove_from_path(usr_bin)
+          import numpy as np  # must succeed BEFORE torch is imported
+          prepend_to_path(usr_bin)
+
+          # Now import molgrapher (which imports torch)
           from molgrapher.models.molgrapher_model import MolgrapherModel
 
           def main():
-              # Single-process dataloader to avoid NumPy issues in workers
+              # Single-process dataloader so no worker env surprises
               model = MolgrapherModel({
                   "force_cpu": True,
                   "force_no_multiprocessing": True,
                   "nb_workers": 0,
                   "persistent_workers": False,
-                  "prefetch_factor": None,
-                  "remove_captions": False,
+                  "preprocess": True,          # PaddleOCR required
+                  "remove_captions": True,
+                  "visualize": False,
               })
 
-              # After any downloads done during init, drop usr\bin
-              strip_usr_bin_from_path()
-              add_dll_dirs_for_mingw64()
+              # After any wget/unzip done during init, drop usr\bin again
+              remove_from_path(usr_bin)
 
-              # NumPy sanity check
-              try:
-                  import numpy as np
-                  _ = np.zeros((1,), dtype=np.float32)
-              except Exception as e:
-                  print("NumPy import check failed:", repr(e), file=sys.stderr)
-                  sys.exit(1)
+              # Tiny NumPy sanity
+              _ = np.zeros((1,), dtype=np.float32)
 
               images_or_paths = ["./data/benchmarks/default/images/image_0.png"]
               annotations = model.predict_batch(images_or_paths)
@@ -113,7 +130,7 @@ jobs:
           if __name__ == "__main__":
               main()
           PY
-
+          
       - name: Check for cairo DLL on PATH
         shell: pwsh
         run: |
