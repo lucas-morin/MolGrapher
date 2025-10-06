@@ -90,6 +90,7 @@ jobs:
                   "force_no_multiprocessing": True,
                   "nb_workers": 0,
                   "persistent_workers": False,
+                  "prefetch_factor": None,
                   "remove_captions": False,
               })
 
