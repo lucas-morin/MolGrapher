@@ -37,6 +37,7 @@ jobs:
           & $PY -V
           & $PY -m pip --version
           & $PY -m pip install --upgrade pip
+          & $PY -m pip install "numpy==1.26.4"
           & $PY -m pip install torch==2.1.2 torchvision==0.16.2
           & $PY -m pip install opencv-python-headless==4.10.*
           & $PY -m pip install paddlepaddle paddleocr==2.10.0
@@ -58,14 +59,54 @@ jobs:
         shell: bash
         run: |
           cat > run_predict.py <<'PY'
+          import os, sys
+
+          # Paddle CPU workaround in CI
+          os.environ["FLAGS_use_mkldnn"] = "0"
+          os.environ["OMP_NUM_THREADS"]  = "1"
+          os.environ["MKL_NUM_THREADS"]  = "1"
+
+          def strip_usr_bin_from_path():
+              path = os.environ.get("PATH", "")
+              parts = path.split(";")
+              filtered = [p for p in parts if not p.lower().endswith("\\usr\\bin")]
+              os.environ["PATH"] = ";".join(filtered)
+
+          def add_dll_dirs_for_mingw64():
+              # Keep cairo DLLs discoverable after removing usr\bin
+              for p in os.environ.get("PATH","").split(";"):
+                  if p.lower().endswith("\\mingw64\\bin"):
+                      try:
+                          os.add_dll_directory(p)
+                      except Exception:
+                          pass
+
           from molgrapher.models.molgrapher_model import MolgrapherModel
 
           def main():
-              model = MolgrapherModel({
-                "remove_captions": False,            
-                "force_no_multiprocessing": True,
-                "force_cpu": True,
-              })
+              # Single-process dataloader to avoid NumPy issues in workers
+              model = MolgrapherModel(
+                  force_cpu=True,
+                  force_no_multiprocessing=True,
+                  nb_workers=0,
+                  persistent_workers=False,
+                  preprocess=True,          # PaddleOCR is required
+                  remove_captions=True,
+                  visualize=False,
+              )
+
+              # After any downloads done during init, drop usr\bin
+              strip_usr_bin_from_path()
+              add_dll_dirs_for_mingw64()
+
+              # NumPy sanity check
+              try:
+                  import numpy as np
+                  _ = np.zeros((1,), dtype=np.float32)
+              except Exception as e:
+                  print("NumPy import check failed:", repr(e), file=sys.stderr)
+                  sys.exit(1)
+
               images_or_paths = ["./data/benchmarks/default/images/image_0.png"]
               annotations = model.predict_batch(images_or_paths)
               print("Predictions:", annotations)
@@ -82,17 +123,13 @@ jobs:
             if (Test-Path (Join-Path $p 'libcairo-2.dll')) { Write-Host "Found cairo in: $p" }
           }
 
-      - name: Run prediction test (Paddle CPU workaround)
+      - name: Run prediction test (Paddle + MSYS2 safe PATH)
         shell: pwsh
         run: |
           $roots = @("C:\tools\msys64","C:\msys64") | Where-Object { Test-Path $_ }
           $msys = $roots[0]
-          # DLLs + msys tools for any downloads
+          # Make tools and cairo DLLs visible at start
           $env:PATH = "$msys\mingw64\bin;$msys\usr\bin;$env:PATH"
-
-          # Work around Paddle fused_conv2d OneDNN crash on Windows CPU
-          $env:FLAGS_use_mkldnn = "0"
-          $env:OMP_NUM_THREADS = "1"   # keep CPU threads small in CI
 
           $PY = Join-Path $env:PythonLocation 'python.exe'
           & $PY run_predict.py
