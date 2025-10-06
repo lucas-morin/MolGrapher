@@ -112,9 +112,7 @@ jobs:
                   "force_no_multiprocessing": True,
                   "nb_workers": 0,
                   "persistent_workers": False,
-                  "preprocess": True,          # PaddleOCR required
-                  "remove_captions": True,
-                  "visualize": False,
+                  "remove_captions": False,
               })
 
               # After any wget/unzip done during init, drop usr\bin again
