@@ -91,7 +91,7 @@ jobs:
                   "nb_workers": 0,
                   "persistent_workers": False,
                   "remove_captions": False,
-              )
+              })
 
               # After any downloads done during init, drop usr\bin
               strip_usr_bin_from_path()
