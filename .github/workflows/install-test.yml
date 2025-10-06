@@ -85,14 +85,12 @@ jobs:
 
           def main():
               # Single-process dataloader to avoid NumPy issues in workers
-              model = MolgrapherModel(
-                  force_cpu=True,
-                  force_no_multiprocessing=True,
-                  nb_workers=0,
-                  persistent_workers=False,
-                  preprocess=True,          # PaddleOCR is required
-                  remove_captions=True,
-                  visualize=False,
+              model = MolgrapherModel({
+                  "force_cpu": True,
+                  "force_no_multiprocessing": True,
+                  "nb_workers": 0,
+                  "persistent_workers": False,
+                  "remove_captions": False,
               )
 
               # After any downloads done during init, drop usr\bin
