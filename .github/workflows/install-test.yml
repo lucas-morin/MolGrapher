@@ -27,29 +27,33 @@ jobs:
           $msys = $roots[0]
           & "$msys\usr\bin\bash.exe" -lc "pacman -Sy --noconfirm"
           & "$msys\usr\bin\bash.exe" -lc "pacman -S --noconfirm mingw-w64-x86_64-cairo mingw-w64-x86_64-pango"
+          # Add DLL directory AFTER Python so it doesn't shadow python.exe
           "$msys\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          # Re-assert the setup-python location to the front of PATH (belt & suspenders)
+          "$env:PythonLocation" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8
 
-      - name: Install dependencies
+      - name: Install dependencies (use setup-python interpreter explicitly)
         shell: pwsh
         run: |
-          python -V
-          where python
-          python -m pip --version
-          python -m pip install --upgrade pip
-          python -m pip install torch==2.1.2 torchvision==0.16.2
-          python -m pip install opencv-python-headless==4.10.*
-          python -m pip install paddlepaddle paddleocr==2.10.0
-          python -m pip install "molgrapher @ git+https://github.com/lucas-morin/MolGrapher"
+          $PY = Join-Path $env:PythonLocation 'python.exe'
+          & $PY -V
+          & $PY -m pip --version
+          & $PY -m pip install --upgrade pip
+          & $PY -m pip install torch==2.1.2 torchvision==0.16.2
+          & $PY -m pip install opencv-python-headless==4.10.*
+          & $PY -m pip install paddlepaddle paddleocr==2.10.0
+          & $PY -m pip install "molgrapher @ git+https://github.com/lucas-morin/MolGrapher"
 
       - name: Sanity check imports
         shell: pwsh
         run: |
-          python - << 'PY'
-          import sys; print(sys.executable)
-          import cv2, torch, paddle
-          print("cv2", cv2.__version__)
-          print("torch", torch.__version__)
-          print("paddle", paddle.__version__)
+          $PY = Join-Path $env:PythonLocation 'python.exe'
+          & $PY - << 'PY'
+          import sys, cv2, torch, paddle
+          print("python:", sys.executable)
+          print("cv2:", cv2.__version__)
+          print("torch:", torch.__version__)
+          print("paddle:", paddle.__version__)
           PY
 
       - name: Create prediction test script
