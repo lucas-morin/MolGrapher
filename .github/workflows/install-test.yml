@@ -66,8 +66,27 @@ jobs:
               main()
           PY
 
-      - name: Run prediction test
-        run: python run_predict.py
+      - name: Check for cairo DLL on PATH
+        shell: pwsh
+        run: |
+          $paths = $env:PATH -split ';'
+          foreach ($p in $paths) {
+            if (Test-Path (Join-Path $p 'libcairo-2.dll')) { Write-Host "Found cairo in: $p" }
+          }
+
+      - name: Run prediction test (with cairo on PATH)
+        shell: pwsh
+        run: |
+          # Discover MSYS2 root that we installed earlier
+          $roots = @("C:\tools\msys64","C:\msys64") | Where-Object { Test-Path $_ }
+          $msys = $roots[0]
+          # Prepend the cairo/pango DLL directory for THIS step's process
+          $env:PATH = "$msys\mingw64\bin;$env:PATH"
+
+          $PY = Join-Path $env:PythonLocation 'python.exe'
+          # Optional: verify the DLL is there
+          Get-ChildItem "$msys\mingw64\bin\libcairo-2.dll" -ErrorAction SilentlyContinue | Format-Table -AutoSize
+          & $PY run_predict.py
 
   # linux-cpu:
   #   runs-on: ubuntu-latest
