@@ -72,18 +72,17 @@ jobs:
             if (Test-Path (Join-Path $p 'libcairo-2.dll')) { Write-Host "Found cairo in: $p" }
           }
 
-      - name: Run prediction test (with MSYS2 tools on PATH)
+      - name: Run prediction test (Paddle CPU workaround)
         shell: pwsh
         run: |
           $roots = @("C:\tools\msys64","C:\msys64") | Where-Object { Test-Path $_ }
           $msys = $roots[0]
-          # Make sure cairo DLLs and msys2 tools are discoverable for THIS process
+          # DLLs + msys tools for any downloads
           $env:PATH = "$msys\mingw64\bin;$msys\usr\bin;$env:PATH"
 
-          # Optional debug: show which tools we have
-          bash --version | Select-Object -First 1
-          wget --version | Select-Object -First 1
-          tar --version | Select-Object -First 1
+          # Work around Paddle fused_conv2d OneDNN crash on Windows CPU
+          $env:FLAGS_use_mkldnn = "0"
+          $env:OMP_NUM_THREADS = "1"   # keep CPU threads small in CI
 
           $PY = Join-Path $env:PythonLocation 'python.exe'
           & $PY run_predict.py
