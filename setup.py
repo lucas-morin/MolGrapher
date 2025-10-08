@@ -112,8 +112,8 @@ setuptools.setup(
             install_paddle("paddlepaddle-gpu", "2.6.0"),
         ],
         "cpu": [
-            install_torch("torch", "2.1.2", cpu=True),
-            install_torch("torchvision", "0.16.2", cpu=True),
+            "torch",
+            "torchvision",
             "paddlepaddle",
         ],
     },
