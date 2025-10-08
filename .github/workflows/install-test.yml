@@ -138,6 +138,11 @@ jobs:
             if (Test-Path (Join-Path $p 'libcairo-2.dll')) { Write-Host "Found cairo in: $p" }
           }
 
+      - name: Preload NumPy at interpreter startup
+        shell: pwsh
+        run: |
+          Set-Content -Path sitecustomize.py -Value "import numpy as _np"
+          
       - name: Run prediction test (Paddle + MSYS2 safe PATH)
         shell: pwsh
         run: |
