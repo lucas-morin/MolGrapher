@@ -6,11 +6,12 @@ on:
   pull_request:
 
 jobs:
-  windows:
-    runs-on: windows-latest
+  linux-cpu:
+    runs-on: ubuntu-latest
     strategy:
-      matrix: { python-version: ["3.11"] }
-
+      matrix:
+        python-version: ["3.12"]
+    
     steps:
       - uses: actions/checkout@v4
 
@@ -18,110 +19,19 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: Install Cairo/Pango (MSYS2) and add to PATH
-        shell: pwsh
+      
+      - name: Install dependencies
         run: |
-          choco install msys2 -y
-          $roots = @("C:\tools\msys64","C:\msys64") | Where-Object { Test-Path $_ }
-          $msys = $roots[0]
-          & "$msys\usr\bin\bash.exe" -lc "pacman -Sy --noconfirm"
-          & "$msys\usr\bin\bash.exe" -lc "pacman -S --noconfirm mingw-w64-x86_64-cairo mingw-w64-x86_64-pango wget unzip"
-          # DLLs for cairo/pango
-          "$msys\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
-      - name: Install dependencies (use setup-python interpreter explicitly)
-        shell: pwsh
-        run: |
-          $PY = Join-Path $env:PythonLocation 'python.exe'
-          & $PY -V
-          & $PY -m pip --version
-          & $PY -m pip install --upgrade pip
-          & $PY -m pip install "numpy==1.26.4"
-          & $PY -m pip install torch==2.1.2 torchvision==0.16.2
-          & $PY -m pip install opencv-python-headless==4.10.*
-          & $PY -m pip install paddlepaddle paddleocr==2.10.0
-          & $PY -m pip install "molgrapher @ git+https://github.com/lucas-morin/MolGrapher"
-
-      - name: Reinstall specific Paddle CPU
-        shell: pwsh
-        run: |
-          $PY = Join-Path $env:PythonLocation 'python.exe'
-          & $PY -m pip install --upgrade --force-reinstall "paddlepaddle==2.6.0"
-
-      - name: Sanity check imports
-        shell: pwsh
-        run: |
-          $PY = Join-Path $env:PythonLocation 'python.exe'
-          & $PY -c "import sys,cv2,torch,paddle; print('python:',sys.executable); print('cv2:',cv2.__version__); print('torch:',torch.__version__); print('paddle:',paddle.__version__)"
+          python -m pip install --upgrade pip
+          pip install "git+https://github.com/lucas-morin/MolGrapher#egg=molgrapher[cpu]"
 
       - name: Create prediction test script
-        shell: bash
         run: |
           cat > run_predict.py <<'PY'
-          import os, sys
-
-          # Paddle CPU workaround in CI (avoid OneDNN crash)
-          os.environ["FLAGS_use_mkldnn"] = "0"
-          os.environ["OMP_NUM_THREADS"]  = "1"
-          os.environ["MKL_NUM_THREADS"]  = "1"
-
-          def find_msys_paths():
-              usr_bin = None
-              mingw_bin = None
-              for p in os.environ.get("PATH","").split(";"):
-                  pl = p.lower().rstrip("\\/")
-                  if pl.endswith("\\msys64\\usr\\bin"):
-                      usr_bin = p
-                  if pl.endswith("\\msys64\\mingw64\\bin"):
-                      mingw_bin = p
-              return usr_bin, mingw_bin
-
-          def remove_from_path(target):
-              if not target:
-                  return
-              parts = [p for p in os.environ.get("PATH","").split(";") if p and os.path.normcase(p) != os.path.normcase(target)]
-              os.environ["PATH"] = ";".join(parts)
-
-          def prepend_to_path(target):
-              if target and target not in os.environ.get("PATH",""):
-                  os.environ["PATH"] = f"{target};" + os.environ.get("PATH","")
-
-          usr_bin, mingw_bin = find_msys_paths()
-
-          # Ensure cairo DLLs remain discoverable no matter how PATH changes
-          if mingw_bin:
-              try:
-                  os.add_dll_directory(mingw_bin)
-              except Exception:
-                  pass
-
-          # CRITICAL: make torch see NumPy.
-          # Remove msys2\usr\bin, import numpy FIRST (before torch), then re-add usr\bin.
-          remove_from_path(usr_bin)
-          import numpy as np  # must succeed BEFORE torch is imported
-          prepend_to_path(usr_bin)
-
-          # Now import molgrapher (which imports torch)
           from molgrapher.models.molgrapher_model import MolgrapherModel
 
           def main():
-              # Single-process dataloader so no worker env surprises
-              model = MolgrapherModel({
-                  "force_cpu": True,
-                  "force_no_multiprocessing": True,
-                  "nb_workers": 0,
-                  "persistent_workers": False,
-                  "prefetch_factor": None,
-                  "remove_captions": False,
-              })
-
-              # After any wget/unzip done during init, drop usr\bin again
-              remove_from_path(usr_bin)
-
-              # Tiny NumPy sanity
-              _ = np.zeros((1,), dtype=np.float32)
-
+              model = MolgrapherModel()
               images_or_paths = ["./data/benchmarks/default/images/image_0.png"]
               annotations = model.predict_batch(images_or_paths)
               print("Predictions:", annotations)
@@ -129,67 +39,9 @@ jobs:
           if __name__ == "__main__":
               main()
           PY
-          
-      - name: Check for cairo DLL on PATH
-        shell: pwsh
-        run: |
-          $paths = $env:PATH -split ';'
-          foreach ($p in $paths) {
-            if (Test-Path (Join-Path $p 'libcairo-2.dll')) { Write-Host "Found cairo in: $p" }
-          }
 
-      - name: Preload NumPy at interpreter startup
-        shell: pwsh
-        run: |
-          Set-Content -Path sitecustomize.py -Value "import numpy as _np"
-          
-      - name: Run prediction test (Paddle + MSYS2 safe PATH)
-        shell: pwsh
-        run: |
-          $roots = @("C:\tools\msys64","C:\msys64") | Where-Object { Test-Path $_ }
-          $msys = $roots[0]
-          # Make tools and cairo DLLs visible at start
-          $env:PATH = "$msys\mingw64\bin;$msys\usr\bin;$env:PATH"
-
-          $PY = Join-Path $env:PythonLocation 'python.exe'
-          & $PY run_predict.py
-
-  # linux-cpu:
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       python-version: ["3.11"]
-    
-  #   steps:
-  #     - uses: actions/checkout@v4
-
-  #     - name: Set up Python
-  #       uses: actions/setup-python@v5
-  #       with:
-  #         python-version: ${{ matrix.python-version }}
-      
-  #     - name: Install dependencies
-  #       run: |
-  #         python -m pip install --upgrade pip
-  #         pip install "git+https://github.com/lucas-morin/MolGrapher#egg=molgrapher[cpu]"
-
-  #     - name: Create prediction test script
-  #       run: |
-  #         cat > run_predict.py <<'PY'
-  #         from molgrapher.models.molgrapher_model import MolgrapherModel
-
-  #         def main():
-  #             model = MolgrapherModel()
-  #             images_or_paths = ["./data/benchmarks/default/images/image_0.png"]
-  #             annotations = model.predict_batch(images_or_paths)
-  #             print("Predictions:", annotations)
-
-  #         if __name__ == "__main__":
-  #             main()
-  #         PY
-
-  #     - name: Run prediction test
-  #       run: python run_predict.py
+      - name: Run prediction test
+        run: python run_predict.py
 
   # macos:
   #   strategy:
